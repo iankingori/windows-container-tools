@@ -245,3 +245,80 @@ std::wstring Utility::ReplaceAll(_In_ std::wstring Str, _In_ const std::wstring&
     return Str;
 }
 
+///
+/// \brief Wrapper around WideCharToMultiByte function to convert wstring to utf8 
+///
+/// \param str The string to convert
+/// \param byte_size optional int, returns string buffer size in bytes
+/// 
+/// \return a utf8 encoded string 
+std::string Utility::WideStringToUtf8(_In_ const std::wstring &&str, _Out_ int& byte_size)
+{
+    std::string unicode_string;
+    int string_length = (int) str.length();
+    
+    // get byte size required to resize and populate the unicode string
+    byte_size = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), string_length, NULL, 0, NULL, NULL);
+
+    if (byte_size > 0)
+    {
+        unicode_string.resize(byte_size);
+        WideCharToMultiByte(CP_UTF8, 0, str.c_str(), string_length, &unicode_string[0], byte_size, NULL, NULL);
+    }
+
+    return unicode_string;
+}
+
+std::wstring
+Utility::ConvertStringToUTF16(
+    _In_reads_bytes_(StringSize) LPBYTE StringPtr,
+    _In_ UINT StringSize,
+    _In_ LM_FILETYPE EncodingType
+    )
+{
+    std::wstring Result;
+    if (StringSize == 0)
+    {
+        return std::wstring();
+    }
+
+    switch (EncodingType)
+    {
+    case LM_FILETYPE::UTF16LE:
+    {
+        Result = wstring((wchar_t*)StringPtr, (wchar_t*)(StringPtr + StringSize));
+        break;
+    }
+    case LM_FILETYPE::UTF16BE:
+    {
+        Result = wstring((wchar_t*)StringPtr, (wchar_t*)(StringPtr + StringSize));
+
+        //
+        // Reverse each wide character, to make it little endian
+        //
+        for (unsigned int i = 0; i < Result.size(); i++)
+        {
+            Result[i] = (TCHAR)(((Result[i] << 8) & 0xFF00) + ((Result[i] >> 8) & 0xFF));
+        }
+        break;
+    }
+    case LM_FILETYPE::UTF8:
+    {
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)StringPtr, StringSize, NULL, 0);
+        Result.resize(size_needed);
+
+        MultiByteToWideChar(CP_UTF8, 0, (LPCCH)StringPtr, StringSize, (LPWSTR)(Result.data()), size_needed);
+        break;
+    }
+    default:
+    {
+        std::string tempStr((char*)StringPtr, (char*)(StringPtr + StringSize));
+        //
+        // ANSI
+        //
+        Result = wstring(tempStr.begin(), tempStr.end());
+    }
+    }
+
+    return Result;
+}

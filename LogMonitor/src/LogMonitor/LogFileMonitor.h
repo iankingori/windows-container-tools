@@ -13,17 +13,6 @@
 
 #define PREFIX_EXTENDED_PATH L"\\\\?\\"
 
-///
-/// LogMonitor filetype
-///
-enum LM_FILETYPE {
-    FileTypeUnknown,
-    ANSI,
-    UTF16LE,
-    UTF16BE,
-    UTF8
-};
-
 struct LogFileInformation
 {
     std::wstring FileName;
@@ -206,12 +195,6 @@ private:
         _In_reads_bytes_(BomSize) LPBYTE Bom,
         _In_ UINT BomSize,
         _Out_ UINT& FoundBomSize
-        );
-
-    std::wstring ConvertStringToUTF16(
-        _In_reads_bytes_(StringSize) LPBYTE StringPtr,
-        _In_ UINT StringSize,
-        _In_ LM_FILETYPE EncodingType
         );
 
     LogFileInfoMap::iterator GetLogFilesInformationIt(

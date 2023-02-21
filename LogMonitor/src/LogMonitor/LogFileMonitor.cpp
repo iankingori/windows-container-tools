@@ -1571,7 +1571,7 @@ LogFileMonitor::ReadLogFile(
                 //
                 // Decode read string to UTF16, skipping the BOM if necessary.
                 //
-                const std::wstring decodedString = ConvertStringToUTF16(
+                const std::wstring decodedString = Utility::ConvertStringToUTF16(
                     logFileContents.data() + foundBomSize,
                     bytesRead - foundBomSize,
                     LogFileInfo->EncodingType
@@ -1689,7 +1689,9 @@ void LogFileMonitor::WriteToConsole( _In_ std::wstring Message, _In_ std::wstrin
         prefix = Utility::FormatString(L"[Log File: %s] ", FileName.c_str());
     }
 
-    logWriter.WriteConsoleLog(prefix + Utility::ReplaceAll(Message, L"\n", L"\n" + prefix));
+    if(Message.length() > 0) {
+        logWriter.WriteConsoleLog(prefix + Utility::ReplaceAll(Message, L"\n", L"\n" + prefix));
+    }
 }
 
 DWORD
@@ -1849,60 +1851,6 @@ LogFileMonitor::FileTypeFromBuffer(
     return lmFileType;
 }
 
-
-std::wstring
-LogFileMonitor::ConvertStringToUTF16(
-    _In_reads_bytes_(StringSize) LPBYTE StringPtr,
-    _In_ UINT StringSize,
-    _In_ LM_FILETYPE EncodingType
-    )
-{
-    std::wstring Result;
-    if (StringSize == 0)
-    {
-        return std::wstring();
-    }
-
-    switch (EncodingType)
-    {
-    case LM_FILETYPE::UTF16LE:
-    {
-        Result = wstring((wchar_t*)StringPtr, (wchar_t*)(StringPtr + StringSize));
-        break;
-    }
-    case LM_FILETYPE::UTF16BE:
-    {
-        Result = wstring((wchar_t*)StringPtr, (wchar_t*)(StringPtr + StringSize));
-
-        //
-        // Reverse each wide character, to make it little endian
-        //
-        for (unsigned int i = 0; i < Result.size(); i++)
-        {
-            Result[i] = (TCHAR)(((Result[i] << 8) & 0xFF00) + ((Result[i] >> 8) & 0xFF));
-        }
-        break;
-    }
-    case LM_FILETYPE::UTF8:
-    {
-        int size_needed = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)StringPtr, StringSize, NULL, 0);
-        Result.resize(size_needed);
-
-        MultiByteToWideChar(CP_UTF8, 0, (LPCCH)StringPtr, StringSize, (LPWSTR)(Result.data()), size_needed);
-        break;
-    }
-    default:
-    {
-        std::string tempStr((char*)StringPtr, (char*)(StringPtr + StringSize));
-        //
-        // ANSI
-        //
-        Result = wstring(tempStr.begin(), tempStr.end());
-    }
-    }
-
-    return Result;
-}
 
 ///
 /// Gets an iterator, using first the Key as if it was a long path, and if it

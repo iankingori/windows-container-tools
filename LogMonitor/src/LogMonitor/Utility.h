@@ -5,6 +5,17 @@
 
 #pragma once
 
+///
+/// LogMonitor filetype
+///
+enum LM_FILETYPE {
+    FileTypeUnknown,
+    ANSI,
+    UTF16LE,
+    UTF16BE,
+    UTF8
+};
+
 class Utility final
 {
 public:
@@ -43,5 +54,15 @@ public:
         _In_ std::wstring Str,
         _In_ const std::wstring& From,
         _In_ const std::wstring& To
+    );
+
+    static std::string WideStringToUtf8(
+        _In_  const std::wstring &&str,
+        _Out_ int& byte_size);
+    
+    static std::wstring ConvertStringToUTF16(
+        _In_reads_bytes_(StringSize) LPBYTE StringPtr,
+        _In_ UINT StringSize,
+        _In_ LM_FILETYPE EncodingType
     );
 };

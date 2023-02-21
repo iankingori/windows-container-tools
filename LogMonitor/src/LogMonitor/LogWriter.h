@@ -11,24 +11,24 @@ public:
     LogWriter()
     {
         InitializeSRWLock(&m_stdoutLock);
-
+        
         DWORD dwMode;
 
-        if (!GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &dwMode))
+        stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        if (!GetConsoleMode(stdoutHandle, &dwMode))
         {
-            m_isConsole = false;
+           m_isConsole = false;
         }
-
-        m_isConsole = true;
-
-        _setmode(_fileno(stdout), _O_U8TEXT);
     };
 
     ~LogWriter() {}
 
 private:
+    HANDLE stdoutHandle;
     SRWLOCK m_stdoutLock;
-    bool m_isConsole;
+    bool m_isConsole = true;
+
 
     void FlushStdOut()
     {
@@ -38,7 +38,7 @@ private:
         }
     }
 
-public :
+public:
     bool WriteLog(
         _In_ HANDLE       FileHandle,
         _In_ LPCVOID      Buffer,
@@ -64,9 +64,18 @@ public :
     {
         AcquireSRWLockExclusive(&m_stdoutLock);
 
-        wprintf(L"%s\n", LogMessage.c_str());
-        FlushStdOut();
+        std::wstring FormattedString = LogMessage;
 
+        // only add new line characters to strings not ending in a new line character to avoid blank lines
+        if(LogMessage.find_last_of(L"\n") != LogMessage.size() - 1) {
+            FormattedString = LogMessage + L"\n";
+        }
+        
+        int size_in_bytes;
+
+        std::string encoded = Utility::WideStringToUtf8(FormattedString.c_str(), size_in_bytes);
+        WriteFile(stdoutHandle, encoded.c_str(), (DWORD) size_in_bytes, NULL, NULL);
+        
         ReleaseSRWLockExclusive(&m_stdoutLock);
     }
 
@@ -74,12 +83,7 @@ public :
         _In_ const std::wstring& LogMessage
     )
     {
-        AcquireSRWLockExclusive(&m_stdoutLock);
-
-        wprintf(L"%s\n", LogMessage.c_str());
-        FlushStdOut();
-
-        ReleaseSRWLockExclusive(&m_stdoutLock);
+        WriteConsoleLog(LogMessage.c_str());
     }
 
     void TraceError(

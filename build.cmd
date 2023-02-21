@@ -1,1 +1,1 @@
-msbuild LogMonitor\LogMonitor.sln /p:platform=x64 /p:configuration=Release
+msbuild LogMonitor\LogMonitor.sln /p:platform=x64 /p:configuration=Release /m
