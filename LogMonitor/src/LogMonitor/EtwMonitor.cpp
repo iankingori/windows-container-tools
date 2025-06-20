@@ -63,6 +63,40 @@ EtwMonitor::EtwMonitor(
     }
 }
 
+// Constructor for EtwMonitor that takes a callback function instead of log format
+EtwMonitor::EtwMonitor(
+    _In_ const std::vector<ETWProvider>& Providers,
+    _In_ LogMonitorEventCallback2 onEventCallback
+    ) :
+    m_onEventCallback(onEventCallback)
+{
+    //
+    // This is set as 'true' to stop processing events.
+    //
+    m_stopFlag = false;
+
+    FilterValidProviders(Providers, m_providersConfig);
+
+    if (m_providersConfig.empty())
+    {
+        throw std::invalid_argument("Invalid providers");
+    }
+
+    m_ETWMonitorThread = CreateThread(
+        nullptr,
+        0,
+        (LPTHREAD_START_ROUTINE)&EtwMonitor::StartEtwMonitorStatic,
+        this,
+        0,
+        nullptr
+    );
+
+    if (m_ETWMonitorThread == NULL)
+    {
+        throw std::system_error(std::error_code(GetLastError(), std::system_category()), "CreateThread");
+    }
+}
+
 EtwMonitor::~EtwMonitor()
 {
     ULONG status;
@@ -434,7 +468,11 @@ EtwMonitor::StartEtwMonitor()
     trace.LoggerName = (LPWSTR)g_sessionName.c_str();
     trace.LogFileName = (LPWSTR)NULL;
     trace.Context = this; // Wrap the current object, to call it from the callbacks.
-    trace.EventRecordCallback = (PEVENT_RECORD_CALLBACK)(OnEventRecordTramp);
+    if (m_onEventCallback) {
+        trace.EventRecordCallback = (PEVENT_RECORD_CALLBACK)(m_onEventCallback);
+    } else {
+        trace.EventRecordCallback = (PEVENT_RECORD_CALLBACK)(&EtwMonitor::OnEventRecordTramp);
+    }
     trace.BufferCallback = (PEVENT_TRACE_BUFFER_CALLBACK)(StaticBufferEventCallback);
     trace.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD | PROCESS_TRACE_MODE_REAL_TIME;
 

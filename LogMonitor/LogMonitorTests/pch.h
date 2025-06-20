@@ -57,6 +57,7 @@
 #include "../src/LogMonitor/Parser/LoggerSettings.h"
 #include "../src/LogMonitor/Parser/JsonFileParser.h"
 #include "../src/LogMonitor/LogWriter.h"
+#include "../src/LogMonitor/LogMonitorAPI.h"
 #include "../src/LogMonitor/EtwMonitor.h"
 #include "../src/LogMonitor/EventMonitor.h"
 #include "../src/LogMonitor/FileMonitor/FileMonitorUtilities.h"

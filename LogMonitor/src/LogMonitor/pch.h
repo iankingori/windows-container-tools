@@ -52,6 +52,7 @@
 #include "Parser/LoggerSettings.h"
 #include "Parser/JsonFileParser.h"
 #include "LogWriter.h"
+#include "LogMonitorAPI.h"
 #include "EtwMonitor.h"
 #include "EventMonitor.h"
 #include "FileMonitor/FileMonitorUtilities.h"
