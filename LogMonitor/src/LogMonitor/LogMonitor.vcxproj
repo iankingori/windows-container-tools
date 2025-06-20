@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -162,6 +162,7 @@
     <ClInclude Include="FileMonitor\FileMonitorUtilities.h" />
     <ClInclude Include="LogFileMonitor.h" />
     <ClInclude Include="LogWriter.h" />
+    <ClInclude Include="LogMonitorAPI.h" />
     <ClInclude Include="Parser\ConfigFileParser.h" />
     <ClInclude Include="Parser\JsonFileParser.h" />
     <ClInclude Include="Parser\LoggerSettings.h" />
@@ -178,7 +179,7 @@
     <ClCompile Include="JsonFileParser.cpp" />
     <ClCompile Include="FileMonitor\FileMonitorUtilities.cpp" />
     <ClCompile Include="LogFileMonitor.cpp" />
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="LogMonitorAPI.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

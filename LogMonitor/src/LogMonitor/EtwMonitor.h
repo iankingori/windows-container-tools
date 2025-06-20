@@ -39,6 +39,11 @@ public:
         _In_ std::wstring CustomLogFormat
     );
 
+    EtwMonitor(
+        _In_ const std::vector<ETWProvider>& Providers,
+        _In_ LogMonitorEventCallback2 onEventCallback
+    );
+
     ~EtwMonitor();
 
     static std::wstring EtwFieldsMapping(_In_ std::wstring etwFields, _In_ void* pLogEntryData);
@@ -50,6 +55,8 @@ private:
     std::wstring m_logFormat;
     std::wstring m_customLogFormat;
     TRACEHANDLE m_startTraceHandle;
+
+    LogMonitorEventCallback2 m_onEventCallback;
 
     //
     // Vectors used to store an EVENT_TRACE_PROPERTIES object.
