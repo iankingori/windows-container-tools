@@ -1,10 +1,9 @@
+//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+//
+
 #include "pch.h"
-
-
-#include <string>
-#include <mutex>
-#include <memory>
-
 
 using namespace std;
 #pragma comment(lib, "wevtapi.lib")
@@ -55,13 +54,11 @@ void StartMonitors(_In_ LoggerSettings &settings, LogMonitorEventCallback2 onEve
     // Vectors to store ETW providers
     std::vector<ETWProvider> etwProviders;
 
-
     // Iterate through each log source defined in the settings, only ETW sources are processed here
     for (auto source : settings.Sources)
     {
         switch (source->Type)
         {
-
         case LogSourceType::ETW:
         {
             std::shared_ptr<SourceETW> sourceETW =
@@ -71,6 +68,10 @@ void StartMonitors(_In_ LoggerSettings &settings, LogMonitorEventCallback2 onEve
                 etwProviders);
             break;
         }
+        default:
+            logWriter.TraceWarning(
+                L"Log source type not supported for monitoring");
+            break;
         }
     }
 
